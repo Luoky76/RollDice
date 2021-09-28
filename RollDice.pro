@@ -10,11 +10,15 @@ CONFIG += c++11
 
 SOURCES += \
     main.cpp \
-    mybutton.cpp \
+    module/mybutton.cpp \
+    module/mylabel.cpp \
+    playwidget.cpp \
     widget.cpp
 
 HEADERS += \
-    mybutton.h \
+    module/mybutton.h \
+    module/mylabel.h \
+    playwidget.h \
     widget.h
 
 FORMS += \
