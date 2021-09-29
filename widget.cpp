@@ -6,21 +6,29 @@ Widget::Widget(QWidget *parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
-    setFixedSize(1500,927);
+    setFixedSize(1282,800);
     setWindowTitle("欢乐博饼");
     setWindowIcon(QIcon(":/resource/mooncakeIcon.png"));
 
     backgroundInit();   //初始化背景元素（包括按钮）
 
-    connect(btn_start,&MyButton::mouseEntered,this,&Widget::enterAnimation);    //当鼠标进入开始按钮时，移开周围物件
-    connect(btn_start,&MyButton::mouseLeft,this,&Widget::leaveAnimation);   //当鼠标离开开始按钮时，恢复周围物件
+    connect(btn_singleMode,&MyButton::mouseEntered,this,&Widget::enterAnimation);    //当鼠标进入按钮时，移开周围物件
+    connect(btn_onlineMode,&MyButton::mouseEntered,this,&Widget::enterAnimation);
+    connect(btn_singleMode,&MyButton::mouseLeft,this,&Widget::leaveAnimation);   //当鼠标离开按钮时，恢复周围物件
+    connect(btn_onlineMode,&MyButton::mouseLeft,this,&Widget::leaveAnimation);
 
     connect(ruleHint,&MyLabel::mouseEntered,this,&Widget::showRule);    //当鼠标移动到标签上时，展示游戏规则
     connect(ruleHint,&MyLabel::mouseLeft,this,&Widget::hideRule);   //当鼠标离开标签时，隐藏游戏规则
 
-    connect(btn_start,&MyButton::clicked,[=](){ //按下按钮后打开游戏界面，隐藏此界面
-        PlayWidget::playWidgetInstance()->show();
-        this->hide();
+    connect(btn_singleMode,&MyButton::clicked,[=](){ //按下单机模式按钮
+        QTimer::singleShot(300,[=](){   //延迟一会儿后打开设置界面，隐藏此界面
+            MySetWindow::mySetWindowInstance()->show();
+            this->hide();
+        });
+    });
+
+    connect(MySetWindow::mySetWindowInstance(),&MySetWindow::windowClose,[=](){    //设置界面关闭后，重新展示此界面
+        this->show();
     });
     connect(PlayWidget::playWidgetInstance(),&PlayWidget::windowClose,[=](){    //游戏界面关闭后，重新展示此界面
         this->show();
@@ -30,10 +38,9 @@ Widget::Widget(QWidget *parent)
 void Widget::showRule()
 {
     QPixmap pixmap(":/resource/rule.png");
-    pixmap = pixmap.scaled(600,900,Qt::KeepAspectRatio);
     rule->setFixedSize(pixmap.width(),pixmap.height());
     rule->setPixmap(pixmap);
-    rule->move((width()-rule->width())*0.5,height()-rule->height());
+    rule->move((width()-rule->width())*0.5,(height()-rule->height())*0.5);
 }
 
 void Widget::hideRule()
@@ -47,14 +54,14 @@ void Widget::leaveAnimation()
     animation->setDuration(1000);
     animation->setStartValue(QRect(moon->x(),moon->y(),moon->width(),moon->height()));
     animation->setEndValue(QRect(width()-moon->width(),-moon->height()*0.3,moon->width(),moon->height()));
-    animation->setEasingCurve(QEasingCurve::OutBounce);
+    animation->setEasingCurve(QEasingCurve::InCubic);
     animation->start();
 
     animation = new QPropertyAnimation(change,"geometry");
     animation->setDuration(1000);
     animation->setStartValue(QRect(change->x(),change->y(),change->width(),change->height()));
     animation->setEndValue(QRect(0,height()-change->height(),change->width(),change->height()));
-    animation->setEasingCurve(QEasingCurve::OutBounce);
+    animation->setEasingCurve(QEasingCurve::InCubic);
     animation->start();
 }
 
@@ -63,14 +70,14 @@ void Widget::enterAnimation()
     QPropertyAnimation *animation = new QPropertyAnimation(moon,"geometry"); //设置凸显按钮的动画
     animation->setDuration(1000);
     animation->setStartValue(QRect(moon->x(),moon->y(),moon->width(),moon->height()));
-    animation->setEndValue(QRect(width()-moon->width()+150,-moon->height()*0.3-150,moon->width(),moon->height()));
+    animation->setEndValue(QRect(width()-moon->width()+100,-moon->height()*0.3-100,moon->width(),moon->height()));
     animation->setEasingCurve(QEasingCurve::InOutQuad);
     animation->start();
 
     animation = new QPropertyAnimation(change,"geometry");
     animation->setDuration(1000);
     animation->setStartValue(QRect(change->x(),change->y(),change->width(),change->height()));
-    animation->setEndValue(QRect(-150,height()-change->height()+150,change->width(),change->height()));
+    animation->setEndValue(QRect(-100,height()-change->height()+100,change->width(),change->height()));
     animation->setEasingCurve(QEasingCurve::InOutQuad);
     animation->start();
 }
@@ -86,12 +93,17 @@ void Widget::backgroundInit()
     background->setPixmap(pixmap);
     background->move(0,0);
 
-    btn_start = new MyButton(":/resource/button/start.png","",this);
-    btn_start->move((width()-btn_start->width())*0.5,(height()-btn_start->height())*0.5);
+    //单机模式按钮
+    btn_singleMode = new MyButton(":/resource/button/singleMode.png",":/resource/button/singleMode2.png",this);
+    btn_singleMode->move((width()-btn_singleMode->width())*0.5,(height()-btn_singleMode->height())*0.4);    //设置按钮位置
+
+    //联机模式按钮
+    btn_onlineMode = new MyButton(":/resource/button/onlineMode.png",":/resource/button/onlineMode2.png",this);
+    btn_onlineMode->move((width()-btn_onlineMode->width())*0.5,(height()-btn_onlineMode->height())*0.6);    //设置按钮位置
 
     change = new QLabel(this);    //嫦娥图片
     pixmap.load(":/resource/background/change.png");
-    pixmap = pixmap.scaled(750,750,Qt::KeepAspectRatio);
+    pixmap = pixmap.scaled(500,500,Qt::KeepAspectRatio);
     change->setGeometry(0,0,pixmap.width(),pixmap.height());
     change->setPixmap(pixmap);
     change->move(0,height()-change->height());
@@ -99,7 +111,7 @@ void Widget::backgroundInit()
 
     moon = new QLabel(this);       //月亮图片
     pixmap.load(":/resource/background/moon.png");
-    pixmap = pixmap.scaled(1050,1050,Qt::KeepAspectRatio);
+    pixmap = pixmap.scaled(700,700,Qt::KeepAspectRatio);
     moon->setGeometry(0,0,pixmap.width(),pixmap.height());
     moon->setPixmap(pixmap);
     moon->move(width()-moon->width(),-moon->height()*0.3);

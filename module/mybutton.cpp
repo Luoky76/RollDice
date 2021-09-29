@@ -57,44 +57,38 @@ void MyButton::zoom()   //此函数已解决了连续按按钮会导致的按钮
     zoomUp(dy);    //向上跳跃
 }
 
-void MyButton::mousePressEvent(QMouseEvent *ev)  //接收鼠标按下事件来切换按钮图标
+void MyButton::enterEvent(QEnterEvent *ev)  //接收鼠标进入事件来切换按钮图标
 {
     QPixmap pixmap;
     bool ret = pixmap.load(pressImgPath);
     if (!ret)
     {
         qDebug()<<pressImgPath<<"加载图片失败 mousePressEvent";
-        return QPushButton::mousePressEvent(ev);
+        return QPushButton::enterEvent(ev);
     }
     this->setFixedSize(pixmap.width(),pixmap.height()); //根据图片尺寸设置固定窗口尺寸
     this->setStyleSheet("QPushButton{border:0px;}");    //设置不规则的图片样式表 边框0像素
     this->setIcon(pixmap);
     this->setIconSize(QSize(pixmap.width(),pixmap.height()));
-    QPushButton::mousePressEvent(ev);
+    QPushButton::enterEvent(ev);
+
+    emit mouseEntered();
 }
 
-void MyButton::mouseReleaseEvent(QMouseEvent *ev)    //接收鼠标松开事件来切换按钮图标
+void MyButton::leaveEvent(QEvent *ev)  //接收鼠标离开事件来切换按钮图标
 {
     QPixmap pixmap;
     bool ret = pixmap.load(normalImgPath);
     if (!ret)
     {
         qDebug()<<normalImgPath<<"加载图片失败 mousePressEvent";
-        return QPushButton::mouseReleaseEvent(ev);
+        return QPushButton::leaveEvent(ev);
     }
     this->setFixedSize(pixmap.width(),pixmap.height()); //根据图片尺寸设置固定窗口尺寸
     this->setStyleSheet("QPushButton{border:0px;}");    //设置不规则的图片样式表 边框0像素
     this->setIcon(pixmap);
     this->setIconSize(QSize(pixmap.width(),pixmap.height()));
-    QPushButton::mouseReleaseEvent(ev);
-}
+    QPushButton::leaveEvent(ev);
 
-void MyButton::enterEvent(QEnterEvent *)
-{
-    emit mouseEntered();
-}
-
-void MyButton::leaveEvent(QEvent *)
-{
     emit mouseLeft();
 }

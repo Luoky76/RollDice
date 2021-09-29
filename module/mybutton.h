@@ -15,8 +15,6 @@ private:
     void zoomDown(int dy = 10);
     void zoomUp(int dy = 10);
     void zoom();
-    void mousePressEvent(QMouseEvent *ev) override;
-    void mouseReleaseEvent(QMouseEvent *ev) override;
     void enterEvent(QEnterEvent *ev) override;
     void leaveEvent(QEvent *ev) override;
 

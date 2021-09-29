@@ -1,9 +1,10 @@
 #ifndef WIDGET_H
 #define WIDGET_H
 
-#include <module/mybutton.h>
-#include <module/mylabel.h>
-#include <playwidget.h>
+#include "mysetwindow.h"
+#include "playwidget.h"
+#include "module/mybutton.h"
+#include "module/mylabel.h"
 #include <QWidget>
 #include <QPixmap>
 #include <QPainter>
@@ -33,7 +34,8 @@ private:
     QLabel *background; //背景图片
     QLabel *rule;
     MyLabel *ruleHint;  //游戏规则引导
-    MyButton *btn_start;
+    MyButton *btn_singleMode;   //单机模式按钮
+    MyButton *btn_onlineMode;   //联机模式按钮
     void backgroundInit();
     void enterAnimation();  //鼠标进入按钮的动画
     void leaveAnimation();  //鼠标离开按钮的动画

@@ -12,12 +12,14 @@ SOURCES += \
     main.cpp \
     module/mybutton.cpp \
     module/mylabel.cpp \
+    mysetwindow.cpp \
     playwidget.cpp \
     widget.cpp
 
 HEADERS += \
     module/mybutton.h \
     module/mylabel.h \
+    mysetwindow.h \
     playwidget.h \
     widget.h
 

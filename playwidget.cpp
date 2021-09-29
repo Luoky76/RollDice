@@ -4,6 +4,9 @@ PlayWidget* PlayWidget::playWidget = nullptr;   //懒汉模式
 
 PlayWidget::PlayWidget(QWidget *parent) : QWidget(parent)
 {
+    setFixedSize(1282,800);
+    setWindowIcon(QIcon(":/resource/mooncakeIcon.png"));
+    setWindowTitle("开始博饼吧！");
     backgroundInit();
     prizeInit();
     connect(btn_roll,&MyLabel::mouseEntered,[=](){  //鼠标进入时，中间骰子的动画开始
@@ -15,7 +18,7 @@ PlayWidget::PlayWidget(QWidget *parent) : QWidget(parent)
     connect(rollTimer1,&QTimer::timeout,[=](){   //中间骰子的动画
         static int currentIconPath = 1;
         ++currentIconPath;
-        if (currentIconPath > 6) currentIconPath = 1;
+        if (currentIconPath>6) currentIconPath = 1;
         btn_roll->setIcon(QString(":/resource/dice/%1.png").arg(currentIconPath));
      });
     connect(btn_roll,&MyLabel::click,[=]()  //点击按钮时，结束按钮动画，开始六个骰子的动画
@@ -70,10 +73,6 @@ void PlayWidget::closeEvent(QCloseEvent *)
 
 void PlayWidget::backgroundInit()
 {
-    setFixedSize(1500,927);
-    setWindowIcon(QIcon(":/resource/mooncakeIcon.png"));
-    setWindowTitle("开始博饼吧！");
-
     QPixmap pixmap; //背景图片
     pixmap.load(":/resource/background/background.png");
     pixmap = pixmap.scaled(width(),height());
@@ -83,7 +82,7 @@ void PlayWidget::backgroundInit()
     background->move(0,0);
 
     btn_roll = new MyLabel(":/resource/dice/1.png",this);   //掷骰子按钮
-    btn_roll->move((width()-btn_roll->width())*0.8,(height()-btn_roll->height())*0.8);
+    btn_roll->move((width()-btn_roll->width())*0.9,(height()-btn_roll->height())*0.9);
 
     rollTimer1 = new QTimer(this);
     rollTimer2 = new QTimer(this);
@@ -106,8 +105,8 @@ void PlayWidget::backgroundInit()
     }
 
     prizeRecord = new QListWidget(this);    //获奖记录表
-    prizeRecord->setFixedSize(300,600);
-    prizeRecord->move(100,(height()-prizeRecord->height())*0.5);
+    prizeRecord->setFixedSize(200,500);
+    prizeRecord->move(50,(height()-prizeRecord->height())*0.5);
     QString strStyle = ReadQssFile(":/resource/Style Sheet/whiteListWidget.qss");
     prizeRecord->setStyleSheet(strStyle);
 
