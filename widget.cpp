@@ -30,9 +30,6 @@ Widget::Widget(QWidget *parent)
     connect(MySetWindow::mySetWindowInstance(),&MySetWindow::windowClose,[=](){    //设置界面关闭后，重新展示此界面
         this->show();
     });
-    connect(PlayWidget::playWidgetInstance(),&PlayWidget::windowClose,[=](){    //游戏界面关闭后，重新展示此界面
-        this->show();
-    });
 }
 
 void Widget::showRule()

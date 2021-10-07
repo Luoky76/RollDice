@@ -1,14 +1,14 @@
 #include "playwidget.h"
-
-PlayWidget* PlayWidget::playWidget = nullptr;   //懒汉模式
-
-PlayWidget::PlayWidget(QWidget *parent) : QWidget(parent)
+PlayWidget::PlayWidget(int playerCnt,QWidget *parent) : QWidget(parent)
 {
     setFixedSize(1282,800);
     setWindowIcon(QIcon(":/resource/mooncakeIcon.png"));
     setWindowTitle("开始博饼吧！");
-    backgroundInit();
-    prizeInit();
+
+    backgroundInit();   //初始化背景元素
+    prizeInit();    //初始化获奖等级
+    addPlayer(playerCnt);   //添加玩家
+
     connect(btn_roll,&MyLabel::mouseEntered,[=](){  //鼠标进入时，中间骰子的动画开始
         rollTimer1->start(30);
     });
@@ -20,11 +20,12 @@ PlayWidget::PlayWidget(QWidget *parent) : QWidget(parent)
         ++currentIconPath;
         if (currentIconPath>6) currentIconPath = 1;
         btn_roll->setIcon(QString(":/resource/dice/%1.png").arg(currentIconPath));
-     });
+    });
     connect(btn_roll,&MyLabel::click,[=]()  //点击按钮时，结束按钮动画，开始六个骰子的动画
     {
-        rollTimer1->stop();
-        rollTimer2->start(30);
+        if (currentPlayer>=players.count()) return;
+        if (players[currentPlayer]->getPlayerMode()==PlayerWidget::artificial) return; //当前并非玩家
+        startRoll();
     });
     connect(rollTimer2,&QTimer::timeout,this,&PlayWidget::handleRollTimer2);
 }
@@ -39,11 +40,17 @@ void PlayWidget::handleRollTimer2()
         static int playerId = 0;    //记录当前为第几名玩家
         ++playerId;
         rollTimer2->stop();
-        QString messageText = "     "+prizeGrade[calcPrizeGrade()]+"          ";
-        QString messageTitle = "中奖情况";
-        QMessageBox::information(this,messageTitle,messageText,QMessageBox::Ok);
-        QListWidgetItem *item = new QListWidgetItem(QString("第 %1 位玩家：").arg(playerId)+messageText);   //点击ok后将获奖记录添加进表格
+        QString messageText = prizeGrade[calcPrizeGrade()];
+
+        if (players[currentPlayer]->getPlayerMode() == PlayerWidget::person) //非人机玩家弹窗
+        {
+            QString messageTitle = "中奖情况";
+            QMessageBox::information(this,messageTitle,"     "+messageText+"          ",QMessageBox::Ok);
+        }
+
+        QListWidgetItem *item = new QListWidgetItem(QString(players[currentPlayer]->getPlayerName())+QString(" 获得了")+messageText);   //点击ok后将获奖记录添加进表格
         prizeRecord->addItem(item);
+        nextPlayer();   //下一名玩家
         t=1;
     }
 }
@@ -60,15 +67,25 @@ void PlayWidget::rollDice()
     }
 }
 
-PlayWidget* PlayWidget::playWidgetInstance()
-{
-    if (playWidget == nullptr) playWidget = new PlayWidget();
-    return playWidget;
-}
-
 void PlayWidget::closeEvent(QCloseEvent *)
 {
     emit windowClose();
+}
+
+void PlayWidget::startRoll()
+{
+    if (btn_roll_locked) return;    //按钮处于锁定状态
+    btn_roll_locked = true; //锁定按钮
+    rollTimer1->stop();
+    rollTimer2->start(30);
+}
+
+void PlayWidget::nextPlayer()
+{
+    players[currentPlayer]->animationStop();    //关闭选中动画
+    currentPlayer = (currentPlayer+1)%players.count();
+    players[currentPlayer]->animationStart();   //开始下一个玩家的动画
+    btn_roll_locked = false;    //解锁按钮
 }
 
 void PlayWidget::backgroundInit()
@@ -82,7 +99,7 @@ void PlayWidget::backgroundInit()
     background->move(0,0);
 
     btn_roll = new MyLabel(":/resource/dice/1.png",this);   //掷骰子按钮
-    btn_roll->move((width()-btn_roll->width())*0.9,(height()-btn_roll->height())*0.9);
+    btn_roll->move((width()-btn_roll->width())*0.9,(height()-btn_roll->height())*0.5);
 
     rollTimer1 = new QTimer(this);
     rollTimer2 = new QTimer(this);
@@ -108,7 +125,7 @@ void PlayWidget::backgroundInit()
     prizeRecord->setFixedSize(200,500);
     prizeRecord->move(50,(height()-prizeRecord->height())*0.5);
     QString strStyle = ReadQssFile(":/resource/Style Sheet/whiteListWidget.qss");
-    prizeRecord->setStyleSheet(strStyle);
+    prizeRecord->setStyleSheet(strStyle);   //设置样式
 
     QScreen *screen = QGuiApplication::primaryScreen();
     QRect screenRect = screen->availableVirtualGeometry();  //获取屏幕长宽
@@ -159,7 +176,87 @@ int PlayWidget::calcPrizeGrade()
     return 11;
 }
 
-QString PlayWidget::ReadQssFile(const QString &filePath)
+void PlayWidget::addPlayer(int playerCnt)
+{
+    for (int i=0;i<players.count();++i) delete players[i];  //添加玩家时先清除原有玩家
+    players.clear();
+
+    for (int i=1;i<=playerCnt;++i)
+    {
+        int randomPlayerPixmap = QRandomGenerator::global()->bounded(1,7);
+        players.append(new PlayerWidget(QString(":/resource/player/%1.png").arg(randomPlayerPixmap),this));
+    }
+
+    setPlayerPos(); //初始化玩家位置
+    showPlayer();   //显示玩家
+}
+
+void PlayWidget::showPlayer()
+{
+    for (int i=0;i<players.count();++i)
+    {
+        players[i]->show();
+        players[i]->raise();
+    }
+}
+
+void PlayWidget::setPlayerPos()
+{
+    if (players.count()>=1)
+    {
+        players[0]->move(this->width()*0.2,30);
+    }
+    if (players.count()>=2)
+    {
+        players[1]->move(this->width()*0.35,0);
+    }
+    if (players.count()>=3)
+    {
+        players[2]->move(this->width()*0.5,0);
+    }
+    if (players.count()>=4)
+    {
+        players[3]->move(this->width()*0.65,30);
+    }
+    if (players.count()>=5)
+    {
+        players[4]->move(this->width()*0.65,this->height()-players[4]->height()-30);
+    }
+    if (players.count()>=6)
+    {
+        players[5]->move(this->width()*0.5,this->height()-players[5]->height());
+    }
+    if (players.count()>=7)
+    {
+        players[6]->move(this->width()*0.35,this->height()-players[6]->height());
+    }
+    if (players.count()>=8)
+    {
+        players[7]->move(this->width()*0.2,this->height()-players[7]->height()-30);
+    }
+}
+
+void PlayWidget::setPlayerName(int idx, QString name)
+{
+    if (players.count()-1<idx)
+    {
+        qDebug()<<"不存在这位玩家";
+        return;
+    }
+    players[idx]->setPlayerName(name);
+}
+
+void PlayWidget::gameStart()
+{
+    //每过一段时间，人机发起响应
+    aiTimer = new QTimer(this);
+    aiTimer->start(1000);
+    connect(aiTimer,&QTimer::timeout,this,&PlayWidget::artificialStart);
+
+    players[currentPlayer]->animationStart();
+}
+
+QString PlayWidget::ReadQssFile(const QString &filePath)    //用于读取样式文件
 {
     QString strStyleSheet = "";
     QFile file(filePath);
@@ -168,5 +265,15 @@ QString PlayWidget::ReadQssFile(const QString &filePath)
     {
         strStyleSheet = QLatin1String(file.readAll());
     }
+    file.close();
     return strStyleSheet;
+}
+
+void PlayWidget::artificialStart()
+{
+    if (currentPlayer>=players.count()) return;
+    if (players[currentPlayer]->getPlayerMode()==PlayerWidget::artificial)
+    {
+        startRoll(); //当为人机时自动摇骰子
+    }
 }

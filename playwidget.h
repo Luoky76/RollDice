@@ -1,7 +1,8 @@
 #ifndef PLAYWIDGET_H
 #define PLAYWIDGET_H
 
-#include <module/mylabel.h>
+#include "module/mylabel.h"
+#include "playerwidget.h"
 #include <QWidget>
 #include <QLabel>
 #include <QTimer>
@@ -14,19 +15,26 @@
 #include <QMessageBox>
 #include <QListWidget>
 #include <QFile>
+#include <QList>
 
 class PlayWidget : public QWidget
 {
     Q_OBJECT
 public:
-    static PlayWidget *playWidgetInstance();    //单例模式
+    explicit PlayWidget(int playerCnt,QWidget *parent = nullptr);
+    void addPlayer(int playerCnt);  //添加玩家
+    void setPlayerName(int idx,QString name);   //设置某个特定玩家的名字
+    void gameStart();   //开始游戏
 
 private:
-    explicit PlayWidget(QWidget *parent = nullptr);
+
     static PlayWidget *playWidget;
     void closeEvent(QCloseEvent *ev) override;  //窗口关闭事件
 
     MyLabel *btn_roll;  //摇骰子按钮
+    bool btn_roll_locked = false;   //是否锁定摇骰子按钮
+    void startRoll();   //摇骰子
+
     QTimer *rollTimer1;  //用于摇骰子的按钮的动画
     QTimer *rollTimer2; //用于六个骰子的动画
 
@@ -37,12 +45,21 @@ private:
     QString prizeGrade[12]; //12级的奖项的名称
     QListWidget *prizeRecord;   //获奖记录表
 
+    QList <PlayerWidget *> players;  //玩家实例
+    int currentPlayer = 0;  //轮到哪名玩家
+    void nextPlayer();  //下一名玩家
+
     void backgroundInit();  //初始化背景元素
     void prizeInit();   //初始化获奖等级
     void handleRollTimer2();//响应计时器2的槽函数
     void rollDice();    //摇六个骰子
     int calcPrizeGrade(); //计算获奖等级
+    void showPlayer();  //显示所有玩家
+    void setPlayerPos();    //设置玩家位置
     QString ReadQssFile(const QString &filePath);   //读取qss样式文件
+
+    void artificialStart();   //人机掷骰子
+    QTimer *aiTimer;    //人机响应计时器
 
 signals:
     void windowClose();//窗口关闭信号
