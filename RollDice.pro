@@ -12,7 +12,6 @@ SOURCES += \
     main.cpp \
     module/mybutton.cpp \
     module/mylabel.cpp \
-    module/qwhbreathwidget.cpp \
     mysetwindow.cpp \
     namebox.cpp \
     playerwidget.cpp \
@@ -22,7 +21,6 @@ SOURCES += \
 HEADERS += \
     module/mybutton.h \
     module/mylabel.h \
-    module/qwhbreathwidget.h \
     mysetwindow.h \
     namebox.h \
     playerwidget.h \
