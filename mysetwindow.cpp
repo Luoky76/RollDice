@@ -27,7 +27,7 @@ MySetWindow::MySetWindow(QWidget *parent) : QMainWindow(parent)
                 playWidget = new PlayWidget(qnum.toInt());
                 //当游戏窗口关闭时，清除内存，关闭本窗口
                 connect(playWidget,&PlayWidget::windowClose,[=](){
-                    //delete playWidget;
+                    delete playWidget;
                     playWidget = nullptr;
                     this->close();
                 });
@@ -36,7 +36,6 @@ MySetWindow::MySetWindow(QWidget *parent) : QMainWindow(parent)
             {
                 playWidget->setPlayerName(0,qname);   //设置0号玩家名称
             }
-            playWidget->gameStart();
             playWidget->show();
             this->hide();
         });

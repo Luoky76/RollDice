@@ -21,7 +21,8 @@ public:
     explicit PlayerWidget(QString pixmapPath = "",QWidget *parent = nullptr);
     QString getPlayerName();    //获取玩家名称
     void setPlayerName(QString name);   //设置玩家名
-    int getPlayerMode();
+    int getPlayerMode();    //获取玩家模式
+    void setPlayerMode(int mode);   //修改玩家模式
     void setPixmap(QString pixmapPath);   //设置玩家图片
     void animationStart();  //开始边框特效
     void animationStop();   //结束边框特效

@@ -28,6 +28,9 @@ PlayWidget::PlayWidget(int playerCnt,QWidget *parent) : QWidget(parent)
         startRoll();
     });
     connect(rollTimer2,&QTimer::timeout,this,&PlayWidget::handleRollTimer2);
+    connect(aiTimer,&QTimer::timeout,this,&PlayWidget::artificialStart);    //人机时钟和人机操作连接
+
+    gameStart();    //开始游戏
 }
 
 void PlayWidget::handleRollTimer2()
@@ -42,14 +45,14 @@ void PlayWidget::handleRollTimer2()
         rollTimer2->stop();
         QString messageText = prizeGrade[calcPrizeGrade()];
 
-        if (players[currentPlayer]->getPlayerMode() == PlayerWidget::person) //非人机玩家弹窗
+        if (players[currentPlayer]->getPlayerMode() == PlayerWidget::person) //非人机玩家弹窗显示获奖
         {
             QString messageTitle = "中奖情况";
             QMessageBox::information(this,messageTitle,"     "+messageText+"          ",QMessageBox::Ok);
         }
 
         QListWidgetItem *item = new QListWidgetItem(QString(players[currentPlayer]->getPlayerName())+QString(" 获得了")+messageText);   //点击ok后将获奖记录添加进表格
-        prizeRecord->addItem(item);
+        addRankItem(item);
         nextPlayer();   //下一名玩家
         t=1;
     }
@@ -69,6 +72,7 @@ void PlayWidget::rollDice()
 
 void PlayWidget::closeEvent(QCloseEvent *)
 {
+    gameOver();
     emit windowClose();
 }
 
@@ -103,6 +107,7 @@ void PlayWidget::backgroundInit()
 
     rollTimer1 = new QTimer(this);
     rollTimer2 = new QTimer(this);
+    aiTimer = new QTimer(this);
 
     pixmap.load(":/resource/bowl.png");
     pixmap = pixmap.scaled(pixmap.width()*2,pixmap.height()*2);
@@ -176,6 +181,20 @@ int PlayWidget::calcPrizeGrade()
     return 11;
 }
 
+void PlayWidget::addRankItem(QListWidgetItem *item)
+{
+    prizeRecord->addItem(item);
+    item->setSizeHint(QSize(150,60));   //设置item大小
+    QFont font("微软雅黑");
+    font.setPixelSize(15);
+    item->setFont(font);    //设置字体
+    if (prizeRecord->count()>8) //当列表内元素超过8时，删除最旧的一项
+    {
+        QListWidgetItem *oldItem = prizeRecord->takeItem(0);
+        delete oldItem;
+    }
+}
+
 void PlayWidget::addPlayer(int playerCnt)
 {
     for (int i=0;i<players.count();++i) delete players[i];  //添加玩家时先清除原有玩家
@@ -244,16 +263,22 @@ void PlayWidget::setPlayerName(int idx, QString name)
         return;
     }
     players[idx]->setPlayerName(name);
+    players[idx]->setPlayerMode(PlayerWidget::person);
 }
 
 void PlayWidget::gameStart()
 {
     //每过一段时间，人机发起响应
-    aiTimer = new QTimer(this);
     aiTimer->start(1000);
-    connect(aiTimer,&QTimer::timeout,this,&PlayWidget::artificialStart);
-
     players[currentPlayer]->animationStart();
+    btn_roll_locked = false;    //解锁按钮
+}
+
+void PlayWidget::gameOver()
+{
+    aiTimer->stop();
+    for (auto i:players) i->animationStop();
+    btn_roll_locked = true; //锁定按钮
 }
 
 QString PlayWidget::ReadQssFile(const QString &filePath)    //用于读取样式文件

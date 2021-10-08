@@ -36,6 +36,7 @@ PlayerWidget::PlayerWidget(QString pixmapPath, QWidget *parent) : QWidget(parent
     playerMode->move((this->width()-playerMode->width())*0.5,200);
     playerMode->addItem("人机",artificial);
     playerMode->addItem("玩家",person);
+    playerMode->setCurrentText("玩家");   //设置默认为玩家模式
 
     //为玩家分配随机玩家名
     setRandomPlayerName();
@@ -57,6 +58,21 @@ void PlayerWidget::setPlayerName(QString name)
 int PlayerWidget::getPlayerMode()
 {
     return playerMode->currentData().toInt();
+}
+
+void PlayerWidget::setPlayerMode(int mode)
+{
+    switch (mode) {
+    case person:
+        playerMode->setCurrentText("玩家");
+        break;
+    case artificial:
+        playerMode->setCurrentText("人机");
+        break;
+    default:
+        qDebug()<<"Unknown mode, please use PlayerWidget::person/artificail";
+        break;
+    }
 }
 
 void PlayerWidget::setPixmap(QString pixmapPath)
@@ -99,8 +115,9 @@ void PlayerWidget::setRandomPlayerName()
 
 void PlayerWidget::animationInit()
 {
-    borderColor = Qt::white;
-    animation = new QPropertyAnimation(this, "m_alpha", this);
+    borderColor = QColor(87,250,255);
+    animation = new QPropertyAnimation(this);
+    animation->setTargetObject(this);
     animation->setStartValue(50);
     animation->setKeyValueAt(0.5, 255); //插值
     animation->setEndValue(50);
