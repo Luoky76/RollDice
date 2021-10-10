@@ -47,8 +47,12 @@ void PlayWidget::handleRollTimer2()
 
         if (players[currentPlayer]->getPlayerMode() == PlayerWidget::person) //非人机玩家弹窗显示获奖
         {
-            QString messageTitle = "中奖情况";
-            QMessageBox::information(this,messageTitle,"     "+messageText+"          ",QMessageBox::Ok);
+            PrizeDialog *dialog = new PrizeDialog(messageText);
+            dialog->setWindowTitle(QString("中奖情况"));
+            dialog->show();
+            connect(dialog,&PrizeDialog::dialogClosed,this,[=](){
+                delete dialog;
+            });
         }
 
         QListWidgetItem *item = new QListWidgetItem(QString(players[currentPlayer]->getPlayerName())+QString(" 获得了")+messageText);   //点击ok后将获奖记录添加进表格
@@ -203,7 +207,19 @@ void PlayWidget::addPlayer(int playerCnt)
     for (int i=1;i<=playerCnt;++i)
     {
         int randomPlayerPixmap = QRandomGenerator::global()->bounded(1,7);
-        players.append(new PlayerWidget(QString(":/resource/player/%1.png").arg(randomPlayerPixmap),this));
+        PlayerWidget* playerWidget = new PlayerWidget(QString(":/resource/player/%1.png").arg(randomPlayerPixmap),this);
+        players.append(playerWidget);
+
+        //点击玩家头像时切换玩家头像
+        connect(playerWidget,&PlayerWidget::click,[=](){
+            QString oldPixmapPath = playerWidget->getPixmapPath();
+            oldPixmapPath.remove(":/resource/player/");
+            oldPixmapPath.remove(".png");
+            int pixmapId = oldPixmapPath.toInt();
+            ++pixmapId;
+            if (pixmapId>=7) pixmapId = 1;
+            playerWidget->setPixmapPath(QString(":/resource/player/%1.png").arg(pixmapId));
+        });
     }
 
     setPlayerPos(); //初始化玩家位置

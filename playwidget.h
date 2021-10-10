@@ -2,6 +2,7 @@
 #define PLAYWIDGET_H
 
 #include "module/mylabel.h"
+#include "prizedialog.h"
 #include "playerwidget.h"
 #include <QWidget>
 #include <QLabel>

@@ -3,7 +3,7 @@
 
 #include "namebox.h"
 #include <QWidget>
-#include <QLabel>
+#include <module/mylabel.h>
 #include <QString>
 #include <QPixmap>
 #include <QLineEdit>
@@ -23,12 +23,14 @@ public:
     void setPlayerName(QString name);   //设置玩家名
     int getPlayerMode();    //获取玩家模式
     void setPlayerMode(int mode);   //修改玩家模式
-    void setPixmap(QString pixmapPath);   //设置玩家图片
+    void setPixmapPath(QString pixmapPath);   //设置玩家图片路径
+    QString getPixmapPath();    //获取玩家图片路径
     void animationStart();  //开始边框特效
     void animationStop();   //结束边框特效
+    void showModeSelection(bool showMode);   //显示模式选择框
 
 private:
-    QLabel *playerPixmap;   //玩家图片
+    MyLabel *playerPixmap;   //玩家图片
     QString pixmapPath;     //玩家图片路径
     void setPlayerPixmap(); //设置玩家图片
 
@@ -47,7 +49,7 @@ private:
     void paintEvent(QPaintEvent *event) override;
 
 signals:
-
+    void click();   //玩家头像被点击的信号
 };
 
 #endif // PLAYERWIDGET_H

@@ -11,23 +11,28 @@ CONFIG += c++11
 SOURCES += \
     main.cpp \
     module/mybutton.cpp \
+    module/mydialog.cpp \
     module/mylabel.cpp \
     mysetwindow.cpp \
     namebox.cpp \
     playerwidget.cpp \
     playwidget.cpp \
+    prizedialog.cpp \
     widget.cpp
 
 HEADERS += \
     module/mybutton.h \
+    module/mydialog.h \
     module/mylabel.h \
     mysetwindow.h \
     namebox.h \
     playerwidget.h \
     playwidget.h \
+    prizedialog.h \
     widget.h
 
 FORMS += \
+    module/mydialog.ui \
     widget.ui
 
 # Default rules for deployment.

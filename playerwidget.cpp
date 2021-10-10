@@ -6,10 +6,13 @@ PlayerWidget::PlayerWidget(QString pixmapPath, QWidget *parent) : QWidget(parent
     this->setFixedSize(200,230);
 
     //设置玩家图片
-    playerPixmap = new QLabel(this);
+    playerPixmap = new MyLabel(this);
     playerPixmap->setFixedSize(200,200);
     playerPixmap->move(0,0);
     setPlayerPixmap();
+    connect(playerPixmap,&MyLabel::click,[=](){ //将点击头像的信号外传
+        emit click();
+    });
 
     //设置玩家名编辑条
     QPalette palette;
@@ -37,6 +40,7 @@ PlayerWidget::PlayerWidget(QString pixmapPath, QWidget *parent) : QWidget(parent
     playerMode->addItem("人机",artificial);
     playerMode->addItem("玩家",person);
     playerMode->setCurrentText("玩家");   //设置默认为玩家模式
+    playerMode->show();
 
     //为玩家分配随机玩家名
     setRandomPlayerName();
@@ -75,10 +79,15 @@ void PlayerWidget::setPlayerMode(int mode)
     }
 }
 
-void PlayerWidget::setPixmap(QString pixmapPath)
+void PlayerWidget::setPixmapPath(QString pixmapPath)
 {
     this->pixmapPath = pixmapPath;
     setPlayerPixmap();
+}
+
+QString PlayerWidget::getPixmapPath()
+{
+    return pixmapPath;
 }
 
 void PlayerWidget::animationStart()
@@ -94,6 +103,12 @@ void PlayerWidget::animationStop()
     animation->stop();
     animationOn = false;
     this->update(); //更新以消除白框
+}
+
+void PlayerWidget::showModeSelection(bool showMode)
+{
+    if (showMode) playerMode->show();
+    else playerMode->hide();
 }
 
 void PlayerWidget::setPlayerPixmap()
