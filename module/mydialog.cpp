@@ -29,6 +29,9 @@ MyDialog::MyDialog(QWidget *parent) :
     ui->textLabel->setPalette(label_pe);
     ui->textLabel->setFont(ft);
     ui->textLabel->setAlignment(Qt::AlignCenter);   //设置文字居中
+
+    //设置按钮的鼠标
+    ui->btn_yes->setCursor(Qt::PointingHandCursor);
 }
 
 MyDialog::~MyDialog()
